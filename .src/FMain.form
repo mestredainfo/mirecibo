@@ -1,0 +1,59 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,64,47)
+  Font = Font["12"]
+  Text = ("MIRecibos")
+  Icon = Picture["mirecibo.png"]
+  Resizable = False
+  Arrangement = Arrange.Fill
+  { Menu1 Menu
+    Text = ("Clientes")
+    { mnuClientesPF Menu
+      Text = ("Pessoa Física")
+    }
+    { mnuClientesPJ Menu
+      Text = ("Pessoa Jurídica")
+    }
+  }
+  { Menu3 Menu
+    Text = ("Recibos")
+    { mnuRecibosPF Menu
+      Text = ("Pessoa Física")
+    }
+    { mnuRecibosPJ Menu
+      Text = ("Pessoa Jurídica")
+    }
+  }
+  { Menu2 Menu
+    Text = ("Relatórios")
+    { mnuRelatorioPF Menu
+      Text = ("Pessoa Física")
+    }
+    { mnuRelatorioPJ Menu
+      Text = ("Pessoa Juridica")
+    }
+  }
+  { Menu4 Menu
+    Text = ("Configuração")
+    { mnuConfigEmpresa Menu
+      Text = ("Empresa")
+    }
+  }
+  { Menu5 Menu
+    Text = ("Ajuda")
+    { mnuSuporte Menu
+      Text = ("Suporte")
+    }
+    { Menu7 Menu
+    }
+    { mnuApoie Menu
+      Text = ("Apoie MIRecibo")
+    }
+    { Menu6 Menu
+    }
+    { mnuSobre Menu
+      Text = ("Sobre MIRecibo")
+    }
+  }
+}

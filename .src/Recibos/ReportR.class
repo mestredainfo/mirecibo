@@ -1,0 +1,310 @@
+' Gambas class file
+
+' Copyright (C) 2004-2024 Murilo Gomes Julio
+' SPDX-License-Identifier: GPL-2.0-only
+
+' Mestre da Info
+' Site: https://www.mestredainfo.com.br
+
+Public sTipo As String = "pf"
+Public sIDs As String = ""
+Private $conecta As Connection
+
+Private Function getIDCliente(id As Integer) As String
+  
+  Dim txt As String = ""
+  Dim $conecta1 As Connection
+  
+  Try $conecta1.Close()
+  $conecta1 = New Connection
+  $conecta1.Type = "sqlite3"
+  $conecta1.Host = FMain.dbPath 
+  $conecta1.Name = FMain.dbName
+  $conecta1.Open()
+  
+  Dim rs As Result = $conecta1.Exec("SELECT id,nome FROM mi_clientes WHERE id=&1 AND tipo=&2", id, sTipo)
+  
+  While (rs.Available)
+    txt = rs!nome
+    rs.MoveNext()
+  Wend
+  $conecta1.Close()
+  
+  Return txt   
+  
+End
+
+Private Function getDados() As Collection
+  
+  Dim txt As New Collection
+  Dim $conecta1 As Connection
+  
+  Try $conecta1.Close()
+  $conecta1 = New Connection
+  $conecta1.Type = "sqlite3"
+  $conecta1.Host = FMain.dbPath 
+  $conecta1.Name = FMain.dbName
+  $conecta1.Open()
+  
+  Dim rs As Result = $conecta1.Exec("SELECT * FROM mi_options WHERE id=1")
+  
+  While (rs.Available)
+    txt.Add(rs!nome, "nome")
+    txt.Add(rs!endereco, "endereco")
+    txt.Add(rs!telefone, "telefone")
+    txt.Add(rs!email, "email")
+    txt.Add(rs!link, "link")
+    
+    rs.MoveNext()
+  Wend
+  $conecta1.Close()
+  
+  Return txt  
+  
+End
+
+Private Function formatMoeda(valor As String) As String
+  
+  Dim a As String = Format(valor, "$,#.###")
+  
+  If InStr(a, ",") = 0 Then 
+    a = a & ",00"
+  Endif
+  
+  Return a
+  
+End
+
+Public Function RemoveHtmlTags(html As String) As String
+  
+  Dim i As Integer
+  Dim result As String
+  Dim inTag As Boolean
+  
+  result = ""
+  inTag = False
+  
+  For i = 1 To Len(html)
+    Dim currentChar As String
+    currentChar = Mid(html, i, 1)
+    
+    If currentChar = "<" Then
+      inTag = True
+    Else If currentChar = ">" Then
+      inTag = False
+    Else If Not inTag Then
+      result &= currentChar
+    Endif
+  Next
+  
+  Return result
+  
+End
+
+Private Function novaLinha(valor As String, Optional rotulo As String = "") As Integer
+  
+  Dim sTamanho As Integer = 50
+  Dim result As Integer = 1
+  Dim sEspaco As Integer = sTamanho
+  Dim valores As String = rotulo & valor 
+  ' Adiciona quebras de linha a cada 20 caracteres
+  For i As Integer = 0 To Len(valores) - 1 Step sTamanho
+    ' Encontra o espaço mais próximo antes do limite de `lineLength`
+    sEspaco = InStr(valores, " ", sTamanho)
+    
+    ' Se não houver espaço, usa o comprimento padrão
+    If sEspaco = 0 Then
+      sEspaco = sTamanho
+    Else
+      sEspaco = sEspaco - 1
+    End If
+    
+    If i + sEspaco < Len(valores) Then     
+      result += i
+    End If
+  Next 
+  
+  Return result
+  
+End
+
+Public Sub Report_Open()
+  
+  Dim a As ReportLabel
+  Dim b As ReportTextLabel
+  Dim c As ReportLine
+  Dim d As ReportHBox
+  Dim sDados As Collection = getDados()
+  Dim pageBreak As ReportPageBreak
+    
+  Try $conecta.Close()
+  $conecta = New Connection
+  $conecta.Type = "sqlite3"
+  $conecta.Host = FMain.dbPath 
+  $conecta.Name = FMain.dbName
+  $conecta.Open()
+  
+  Dim rs As Result
+  
+  If sIDs = "" Then 
+    rs = $conecta.Exec("SELECT * FROM mi_recibos WHERE tipo=&1", sTipo)
+  Else 
+    rs = $conecta.Exec("SELECT * FROM mi_recibos WHERE id IN (" & sIDs & ")")
+  Endif 
+  
+  While (rs.Available)
+    For i As Integer = 1 To 2
+      'Recibo
+      a = New ReportLabel(ReportVBox1)
+      a.Text = "Recibo de Pagamento (" & i & "ª via)"
+      a.Alignment = Align.Right
+      a.Font.bold = True
+      a.Font.Size = 7
+      a.Margin.Bottom = "3mm"
+      
+      'Empresa
+      a = New ReportLabel(ReportVBox1)
+      a.Text = sDados["nome"]
+      a.Alignment = Align.Center
+      a.Font.bold = True
+      a.Font.Size = 14
+      
+      'Endereco
+      a = New ReportLabel(ReportVBox1)
+      a.Text = sDados["endereco"]
+      a.Alignment = Align.Center
+      a.Font.bold = True
+      a.Font.Size = 12
+      
+      'Total:
+      b = New ReportTextLabel(ReportVBox1)
+      b.Text = "<font color=black><b>Valor Total: </b></font>" & formatMoeda(rs!total)
+      b.Font.Size = 12
+      b.Alignment = Align.Right
+      b.Margin.Top = "3mm"
+      
+      'Campo Recebi de
+      b = New ReportTextLabel(ReportVBox1)
+      b.Text = "<font color=black><b>Recebi de: </b></font> "
+      If IsInteger(rs!nome) = True Then 
+        b.Text &= getIDCliente(rs!nome)
+      Else 
+        b.Text &= rs!nome 
+      Endif 
+      b.Font.Size = 12
+      b.Margin.Top = "2mm"
+      
+      'Campo A importância de
+      b = New ReportTextLabel(ReportVBox1)
+      b.Text = "<font color=black><b>A importância de: </b></font>" & rs!valorextenso
+      b.Alignment = Align.TopLeft
+      b.Font.Size = 12
+      b.Margin.Top = "2mm"
+      If novaLinha(rs!valorextenso, "A importância de:") > 1 Then 
+        b.Height = "47px"
+      Endif
+      
+      'Referente à
+      b = New ReportTextLabel(ReportVBox1)
+      b.Text = "<font color=black><b>Referente: </b></font> " & rs!referente
+      b.Font.Size = 12
+      b.Margin.Top = "2mm"
+      
+      'Valor
+      b = New ReportTextLabel(ReportVBox1)
+      b.Text = "<font color=black><b>Valor: </b></font> " & formatMoeda(rs!valor)
+      b.Font.Size = 12
+      b.Margin.Top = "2mm"
+      
+      d = New ReportHBox(ReportVBox1)
+      b = New ReportTextLabel(d)
+      b.Text = "<font color=black><b>Outros: </b></font>"
+      b.Font.Size = 12
+      b.Margin.Top = "2mm"
+      b.Width = "80%"
+      
+      b = New ReportTextLabel(d)
+      b.Text = "<font color=black><b>Valor: </b></font>"
+      b.Font.Size = 12
+      b.Margin.Top = "2mm"
+      b.Expand = True
+      
+      'Outros1
+      d = New ReportHBox(ReportVBox1)
+      b = New ReportTextLabel(d)
+      b.Text = rs!outros1
+      b.Font.Size = 12
+      b.Margin.Top = "2mm"
+      b.Width = "80%"
+      
+      b = New ReportTextLabel(d)
+      b.Text = formatMoeda(rs!valor1)
+      b.Font.Size = 12
+      b.Margin.Top = "2mm"
+      b.Expand = True
+      
+      'Outros2
+      d = New ReportHBox(ReportVBox1)
+      b = New ReportTextLabel(d)
+      b.Text = rs!outros2
+      b.Font.Size = 12
+      b.Margin.Top = "2mm"
+      b.Width = "80%"
+      
+      b = New ReportTextLabel(d)
+      b.Text = formatMoeda(rs!valor2)
+      b.Font.Size = 12
+      b.Margin.Top = "2mm"
+      b.Expand = True
+      
+      'Outros3
+      d = New ReportHBox(ReportVBox1)
+      b = New ReportTextLabel(d)
+      b.Text = rs!outros3
+      b.Font.Size = 12
+      b.Margin.Top = "2mm"
+      b.Width = "80%"
+      
+      b = New ReportTextLabel(d)
+      b.Text = formatMoeda(rs!valor3)
+      b.Font.Size = 12
+      b.Margin.Top = "2mm"
+      b.Expand = True
+      
+      'Data de Vencimento
+      b = New ReportTextLabel(ReportVBox1)
+      b.Text = "<font color=black><b>Data de Vencimento: </b></font>" & rs!datadevencimento
+      b.Font.Size = 12
+      b.Margin.Top = "2mm"
+      
+      ' Data e Assinatura
+      a = New ReportLabel(ReportVBox1)
+      a.Text = "Data de Pagamento: _____/_____/_______" & Space(18) & "Assinatura: _________________________________"
+      a.Font.bold = True
+      a.Font.Size = 11
+      a.Margin.Top = "9mm"
+      a.Margin.Left = "7mm"
+      a.Margin.Bottom = "7mm"
+      
+      a = New ReportLabel(ReportVBox1)
+      a.Text = sDados["telefone"] & " - " & sDados["email"] & " - " & sDados["link"]
+      a.Font.bold = True
+      a.Font.Size = 11
+      a.Margin.Left = "12mm"
+      
+      If i < 2 Then 
+        'Separador
+        c = New ReportLine(ReportVBox1)
+        c.Height = 1 & "px"
+        c.Margin.Top = "3mm"
+        c.Margin.Bottom = "3mm"
+      Endif 
+    Next 
+    'Nova Página
+    pageBreak = New ReportPageBreak(ReportVBox1)
+    
+    rs.MoveNext()
+  Wend
+  $conecta.Close()
+  
+End

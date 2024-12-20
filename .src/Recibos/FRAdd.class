@@ -1,0 +1,159 @@
+' Gambas class file
+
+' Copyright (C) 2004-2024 Murilo Gomes Julio
+' SPDX-License-Identifier: GPL-2.0-only
+
+' Mestre da Info
+' Site: https://www.mestredainfo.com.br
+
+Public sTipo As String = "pf"
+Public sID As Integer = 0
+
+Public $conecta As Connection
+
+Private Sub getIDClientes() 
+  
+  Try $conecta.Close()
+  $conecta = New Connection
+  $conecta.Type = "sqlite3"
+  $conecta.Host = FMain.dbPath 
+  $conecta.Name = FMain.dbName
+  $conecta.Open()
+  
+  Dim rs As Result = $conecta.Exec("SELECT * FROM mi_clientes WHERE tipo=&1", sTipo)
+  While (rs.Available)
+    txtIDCliente.Add(Subst("&1 #&2", rs!nome, rs!id))
+    rs.MoveNext()
+  Wend
+  $conecta.Close()
+  
+End
+
+Private Function getIDCliente(id As Integer) As String
+  
+  Dim txt As String = ""
+  Dim $conecta1 As Connection
+  
+  Try $conecta1.Close()
+  $conecta1 = New Connection
+  $conecta1.Type = "sqlite3"
+  $conecta1.Host = FMain.dbPath 
+  $conecta1.Name = FMain.dbName
+  $conecta1.Open()
+  
+  Dim rs As Result = $conecta1.Exec("SELECT id,nome FROM mi_clientes WHERE id=&1 AND tipo=&2", id, sTipo)
+  
+  While (rs.Available)
+    txt = rs!nome
+    rs.MoveNext()
+  Wend
+  $conecta1.Close()
+  
+  Return txt   
+  
+End
+
+Public Sub Form_Open()
+  
+  txtValor.Value = 0.00
+  txtValor1.Value = 0.00
+  txtValor2.Value = 0.00
+  txtValor3.Value = 0.00
+  
+  If sID > 0 Then 
+    Try $conecta.Close()
+    $conecta = New Connection
+    $conecta.Type = "sqlite3"
+    $conecta.Host = FMain.dbPath 
+    $conecta.Name = FMain.dbName
+    $conecta.Open()
+    
+    Dim rs As Result = $conecta.Exec("SELECT * FROM mi_recibos WHERE id=&1 AND tipo=&2", sID, sTipo)
+    While (rs.Available)
+      If IsInteger(rs!nome) = True Then 
+        txtIDCliente.Text = Subst("&1 #&2", getIDCliente(rs!nome), rs!nome)
+      Else 
+        txtIDCliente.Text = rs!nome
+      Endif 
+      txtValorExtenso.Text = rs!valorextenso
+      txtReferente.Text = rs!referente
+      txtValor.Value = rs!valor
+      txtOutros1.Text = rs!outros1
+      txtOutros2.Text = rs!outros2
+      txtOutros3.Text = rs!outros3
+      txtValor1.Value = rs!valor1
+      txtValor2.Value = rs!valor2
+      txtValor3.Value = rs!valor3
+      txtDataDeVencimento.Text = rs!datadevencimento
+      txtTotal.Value = rs!total
+      
+      rs.MoveNext()
+    Wend
+    $conecta.Close()
+  Endif
+  
+  getIDClientes()
+  
+End
+
+Public Sub btnSalvar_Click()
+  
+  If txtIDCliente.Text = "" Or Left(txtIDCliente.Text, 1) = " " Then    
+    Message.Info("Preencha o campo Nome!")
+    lblRecebiDe.Foreground = Color.Red
+    txtIDCliente.SetFocus()
+  Else 
+    $conecta = New Connection
+    Try $conecta.Close()
+    $conecta.Type = "sqlite3"
+    $conecta.Host = FMain.dbPath 
+    $conecta.Name = FMain.dbName
+    $conecta.Open()
+    
+    If sID = 0 Then 
+      If InStr(txtIDCliente.Text, "#") = 0 Then 
+        $conecta.Exec("INSERT INTO mi_recibos (nome,valorextenso,referente,valor,outros1,outros2,outros3,valor1,valor2,valor3,datadevencimento,total,tipo) VALUES (&1,&2,&3,&4,&5,&6,&7,&8,&9,&{10},&{11},&{12},&{13})", Trim(txtIDCliente.Text), Trim(txtValorExtenso.Text), Trim(txtReferente.Text), txtValor.Value, Trim(txtOutros1.Text), Trim(txtOutros2.Text), Trim(txtOutros3.Text), txtValor1.Value, txtValor2.Value, txtValor3.Value, Trim(txtDataDeVencimento.Text), txtTotal.Value, sTipo)
+      Else 
+        $conecta.Exec("INSERT INTO mi_recibos (nome,valorextenso,referente,valor,outros1,outros2,outros3,valor1,valor2,valor3,datadevencimento,total,tipo) VALUES (&1,&2,&3,&4,&5,&6,&7,&8,&9,&{10},&{11},&{12},&{13})", Trim(Split(txtIDCliente.Text, "#")[1]), Trim(txtValorExtenso.Text), Trim(txtReferente.Text), txtValor.Value, Trim(txtOutros1.Text), Trim(txtOutros2.Text), Trim(txtOutros3.Text), txtValor1.Value, txtValor2.Value, txtValor3.Value, Trim(txtDataDeVencimento.Text), txtTotal.Value, sTipo)
+      Endif 
+    Else 
+      If InStr(txtIDCliente.Text, "#") = 0 Then
+        $conecta.Exec("UPDATE mi_recibos SET nome=&1,valorextenso=&2,referente=&3,valor=&4,outros1=&5,outros2=&6,outros3=&7,valor1=&8,valor2=&9,valor3=&{10},datadevencimento=&{11},total=&{12} WHERE id=&{13} AND tipo=&{14}", Trim(txtIDCliente.Text), Trim(txtValorExtenso.Text), Trim(txtReferente.Text), txtValor.Value, Trim(txtOutros1.Text), Trim(txtOutros2.Text), Trim(txtOutros3.Text), txtValor1.Value, txtValor2.Value, txtValor3.Value, Trim(txtDataDeVencimento.Text), txtTotal.Value, sID, sTipo)
+      Else 
+        $conecta.Exec("UPDATE mi_recibos SET nome=&1,valorextenso=&2,referente=&3,valor=&4,outros1=&5,outros2=&6,outros3=&7,valor1=&8,valor2=&9,valor3=&{10},datadevencimento=&{11},total=&{12} WHERE id=&{13} AND tipo=&{14}", Trim(Split(txtIDCliente.Text, "#")[1]), Trim(txtValorExtenso.Text), Trim(txtReferente.Text), txtValor.Value, Trim(txtOutros1.Text), Trim(txtOutros2.Text), Trim(txtOutros3.Text), txtValor1.Value, txtValor2.Value, txtValor3.Value, Trim(txtDataDeVencimento.Text), txtTotal.Value, sID, sTipo) 
+      Endif 
+    Endif 
+    
+    $conecta.Close()
+    
+    FRList.carregarDados()
+    
+    Me.Close()
+  Endif 
+  
+End
+
+Public Sub calcValor_Change()
+  
+  Dim tValor As Variant = 0
+  
+  If IsNull(txtValor.Value) = False Then 
+    tValor = txtValor.Value
+  Endif
+  
+  If IsNull(txtValor1.Value) = False Then 
+    tValor += txtValor1.Value
+  Endif
+  
+  If IsNull(txtValor2.Value) = False Then 
+    tValor += txtValor2.Value
+  Endif
+  
+  If IsNull(txtValor3.Value) = False Then 
+    tValor += txtValor3.Value
+  Endif
+  
+  txtValorExtenso.Text = Trim(String.UCaseFirst(MValorExtenso.Obter(tValor)))
+  txtTotal.Value = tValor
+  
+End

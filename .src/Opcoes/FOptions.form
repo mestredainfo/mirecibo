@@ -1,0 +1,53 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,64,65)
+  Font = Font["12"]
+  Text = ("Cadastrar Empresa")
+  Icon = Picture["mirecibo.png"]
+  Resizable = False
+  { btnSalvar Button
+    MoveScaled(21,57,21,6)
+    Text = ("Salvar")
+  }
+  { Label1 Label
+    MoveScaled(1,0,61,5)
+    Font = Font["Bold"]
+    Text = ("Nome (Pessoa Física/Jurídica)")
+  }
+  { txtNome TextBox
+    MoveScaled(1,5,62,5)
+  }
+  { Label2 Label
+    MoveScaled(1,11,61,5)
+    Font = Font["Bold"]
+    Text = ("Endereço")
+  }
+  { txtEndereco TextBox
+    MoveScaled(1,16,62,5)
+  }
+  { Label3 Label
+    MoveScaled(1,22,61,5)
+    Font = Font["Bold"]
+    Text = ("Telefone")
+  }
+  { txtTelefone TextBox
+    MoveScaled(1,27,62,5)
+  }
+  { Label4 Label
+    MoveScaled(1,33,61,5)
+    Font = Font["Bold"]
+    Text = ("E-mail")
+  }
+  { txtEmail TextBox
+    MoveScaled(1,38,62,5)
+  }
+  { txtSite TextBox
+    MoveScaled(1,49,62,5)
+  }
+  { Label5 Label
+    MoveScaled(1,44,61,5)
+    Font = Font["Bold"]
+    Text = ("Site")
+  }
+}

@@ -1,0 +1,51 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,113,71)
+  Font = Font["12"]
+  Text = ("Pessoa Física")
+  Icon = Picture["mirecibo.png"]
+  Arrangement = Arrange.Fill
+  { VBox1 VBox
+    MoveScaled(1,1,92,65)
+    Expand = True
+    { HBox2 HBox
+      MoveScaled(0,0,83,1)
+    }
+    { HBox1 HBox
+      MoveScaled(0,1,83,6)
+      Spacing = True
+      { btnAdd Button
+        MoveScaled(0,0,18,5)
+        Background = &H008000
+        Foreground = &HFFFFFF
+        Text = ("Adicionar")
+      }
+      { btnEditar Button
+        MoveScaled(19,0,18,5)
+        Background = &H1F8FFF
+        Foreground = &HFFFFFF
+        Text = ("Editar")
+      }
+      { btnExcluir Button
+        MoveScaled(38,0,18,5)
+        Background = &HE03737
+        Foreground = &HFFFFFF
+        Text = ("Excluir")
+      }
+    }
+    { HBox3 HBox
+      MoveScaled(0,7,83,1)
+    }
+    { cv ColumnView
+      MoveScaled(0,8,56,35)
+      #Translate = False
+      Expand = True
+      Mode = Select.Multiple
+      Sorted = True
+      Resizable = True
+      AutoResize = False
+      ShowCheck = True
+    }
+  }
+}

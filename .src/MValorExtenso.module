@@ -1,0 +1,159 @@
+' Gambas module file
+
+' Copyright (C) 2004-2024 Murilo Gomes Julio
+' SPDX-License-Identifier: GPL-2.0-only
+
+' Mestre da Info
+' Site: https://www.mestredainfo.com.br
+
+Private Function ConverterParaExtenso(numero As Long) As String
+  
+  Dim unidades As STRING[]
+  Dim dezenas As STRING[]
+  Dim centenas As STRING[]
+  Dim texto As String
+  Dim n As Long
+  Dim milhar As Long
+  
+  unidades = Split("zero um dois três quatro cinco seis sete oito nove", " ")
+  dezenas = Split("dez vinte trinta quarenta cinquenta sessenta setenta oitenta noventa", " ")
+  centenas = Split("cento duzentos trezentos quatrocentos quinhentos seiscentos setecentos oitocentos novecentos", " ")
+  
+  texto = ""
+  
+  If numero = 0 Then
+    Return "zero"
+  End If
+  
+  If numero >= 1000000000 Then
+    milhar = Int(numero / 1000000000)
+    If numero >= 1000000000 And numero <= 1999999999 Then
+      texto = ConverterParaExtenso(milhar) & " bilhão"
+    Else 
+      texto = ConverterParaExtenso(milhar) & " bilhões"
+    Endif 
+    If numero Mod 1000000000 > 0 Then
+      texto = texto & " e " & ConverterParaExtenso(numero Mod 1000000000)
+    End If
+    Return texto
+  End If
+  
+  If numero >= 1000000 Then
+    milhar = Int(numero / 1000000)
+    If numero >= 1000000 And numero <= 1999999 Then
+      texto = ConverterParaExtenso(milhar) & " milhão"
+    Else 
+      texto = ConverterParaExtenso(milhar) & " milhões"
+    Endif 
+    If numero Mod 1000000 > 0 Then
+      texto = texto & " e " & ConverterParaExtenso(numero Mod 1000000)
+    End If
+    Return texto
+  End If
+  
+  If numero >= 1000 Then
+    milhar = Int(numero / 1000)
+    texto = ConverterParaExtenso(milhar) & " mil"
+    If numero Mod 1000 > 0 Then
+      texto = texto & " e " & ConverterParaExtenso(numero Mod 1000)
+    End If
+    Return texto
+  End If
+  
+  If numero >= 100 Then
+    n = Int(numero / 100)
+    If n = 1 And numero Mod 100 = 0 Then
+      texto = "cem"
+    Else 
+      If InStr(CStr(numero), "00") > 0 Then 
+        texto = centenas[n - 1] 
+      Else 
+        texto = centenas[n - 1] & " e "
+      Endif 
+    End If
+    numero = numero Mod 100
+  End If
+  
+  If numero >= 10 Then
+    If numero < 20 Then
+      Select Case numero
+        Case 10
+          texto = texto & "dez"
+        Case 11
+          texto = texto & "onze"
+        Case 12
+          texto = texto & "doze"
+        Case 13
+          texto = texto & "treze"
+        Case 14
+          texto = texto & "quatorze"
+        Case 15
+          texto = texto & "quinze"
+        Case 16
+          texto = texto & "dezesseis"
+        Case 17
+          texto = texto & "dezessete"
+        Case 18
+          texto = texto & "dezoito"
+        Case 19
+          texto = texto & "dezenove"
+      End Select
+      numero = 0
+    Else
+      n = Int(numero / 10)
+      texto = texto & IIf(texto = "", "", " ") & dezenas[n - 1]
+      numero = numero Mod 10
+    End If
+  End If
+  
+  If numero > 0 Then
+    If texto <> "" And Right(texto, 2) <> "e " Then texto = texto & " e "
+    
+    texto = texto & unidades[numero]
+  End If
+  
+  Return Replace(texto, "  ", " ")
+  
+End
+
+Public Function Obter(valor As Float) As String
+  
+  Dim inteiro As Long
+  Dim centavos As Long
+  Dim textoInteiro As String
+  Dim textoCentavos As String
+  
+  ' Separa a parte inteira e a parte decimal
+  inteiro = Int(valor)
+  centavos = Round((valor - inteiro) * 100)
+  
+  ' Converte a parte inteira
+  If inteiro > 0 Then 
+    If inteiro = 1 Then
+      textoInteiro = ConverterParaExtenso(inteiro) & " real" 
+    Else 
+      textoInteiro = ConverterParaExtenso(inteiro) & " reais"
+    Endif
+  Else 
+    textoInteiro = ""
+  Endif 
+  
+  ' Converte a parte decimal (centavos)
+  If centavos > 0 Then
+    textoCentavos = ConverterParaExtenso(centavos) & " centavos"
+  Else
+    textoCentavos = ""
+  End If
+  
+  ' Formata o texto final
+  If textoCentavos <> "" Then
+    If inteiro = 0 Then 
+      Return textoCentavos
+    Else 
+      Return textoInteiro & " e " & textoCentavos
+    Endif 
+  Else
+    Return textoInteiro
+  End If
+  
+End

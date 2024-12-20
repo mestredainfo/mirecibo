@@ -1,0 +1,123 @@
+' Gambas class file
+
+' Copyright (C) 2004-2024 Murilo Gomes Julio
+' SPDX-License-Identifier: GPL-2.0-only
+
+' Mestre da Info
+' Site: https://www.mestredainfo.com.br
+
+Public dbPath As String = User.Home & "/.config/mirecibo/dados/"
+Public dbName As String = "mirecibo.sqlite"
+
+Private $conecta As Connection
+
+Private Sub createDB()
+  
+  If Exist(dbPath & dbName) = False Then 
+    Shell "mkdir -p \"" & dbPath & "\"" Wait 
+    
+    $conecta = New Connection
+    $conecta.Type = "sqlite3"
+    $conecta.Host = dbPath
+    $conecta.Name = ""
+    $conecta.Open
+    $conecta.Databases.Add(dbName)
+    $conecta.Close()
+  Endif 
+  
+  Try $conecta.Close()
+  $conecta = New Connection
+  $conecta.Type = "sqlite3"
+  $conecta.Host = dbPath 
+  $conecta.Name = dbName
+  $conecta.Open()
+  
+  Dim sql As String = "CREATE TABLE IF NOT EXISTS mi_clientes (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, tipo TEXT NOT NULL);"
+  
+  sql &= "CREATE TABLE IF NOT EXISTS mi_recibos (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, valorextenso TEXT NULL, referente TEXT NULL, valor TEXT NULL, outros1 TEXT NULL, outros2 TEXT NULL, outros3 TEXT NULL, valor1 TEXT NULL, valor2 TEXT NULL, valor3 TEXT NULL, datadevencimento TEXT NULL, total TEXT NULL, tipo TEXT NOT NULL);"
+  
+  sql &= "CREATE TABLE IF NOT EXISTS mi_options (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, endereco TEXT NULL, telefone TEXT NULL, email TEXT NULL, link TEXT NULL);"
+  
+  $conecta.Exec(sql)
+  
+  $conecta.Close()  
+  
+End
+
+Public Sub Form_Open()
+  
+  createDB()
+  
+End
+
+Public Sub mnuConfigEmpresa_Click()
+  
+  FOptions.ShowDialog()
+  
+End
+
+Public Sub mnuApoie_Click()
+  
+  Dim sTerm As String = ""
+  
+  Shell "xdg-open \"https://www.mestredainfo.com.br/p/apoie.html\"" To sTerm
+  
+End
+
+Public Sub mnuSobre_Click()
+  
+  FAbout.ShowDialog()
+  
+End
+
+Public Sub mnuClientesPF_Click()
+  
+  FCList.Text = "Clientes (Pessoa Física)"
+  FCList.sTipo = "pf"
+  FCList.ShowDialog()
+  
+End
+
+Public Sub mnuClientesPJ_Click()
+  
+  FCList.Text = "Clientes (Pessoa Jurídica)"
+  FCList.sTipo = "pj"
+  FCList.ShowDialog()
+  
+End
+
+Public Sub mnuRecibosPF_Click()
+  
+  FRList.Text = "Recibos (Pessoa Física)"
+  FRList.sTipo = "pf"
+  FRList.ShowDialog()
+  
+End
+
+Public Sub mnuRecibosPJ_Click()
+  
+  FRList.Text = "Recibos (Pessoa Jurídica)"
+  FRList.sTipo = "pj"
+  FRList.ShowDialog()
+  
+End
+
+Public Sub mnuRelatorioPF_Click()
+  
+  FRReport.sTipo = "pf"
+  FRReport.ShowDialog()
+  
+End
+
+Public Sub mnuRelatorioPJ_Click()
+  
+  FRReport.sTipo = "pj"
+  FRReport.ShowDialog()
+  
+End
+
+Public Sub mnuSuporte_Click()
+
+  FSuporte.ShowDialog()
+
+End

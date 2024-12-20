@@ -1,0 +1,89 @@
+' Gambas class file
+
+' Copyright (C) 2004-2024 Murilo Gomes Julio
+' SPDX-License-Identifier: GPL-2.0-only
+
+' Mestre da Info
+' Site: https://www.mestredainfo.com.br
+
+Public sTipo As String = "pf"
+Public $conecta As Connection
+
+Public Sub carregarDados()
+ 
+  cv.Clear()
+  
+  Try $conecta.Close()
+  $conecta = New Connection
+  $conecta.Type = "sqlite3"
+  $conecta.Host = FMain.dbPath 
+  $conecta.Name = FMain.dbName
+  $conecta.Open()
+  
+  Dim rs As Result = $conecta.Exec("SELECT * FROM mi_clientes WHERE tipo=&1", sTipo)
+  
+  While (rs.Available)
+    cv.Add(rs!id, rs!id)
+    cv[rs!id][1] = rs!nome
+    rs.MoveNext()
+  Wend
+  $conecta.Close()
+  
+End
+
+Public Sub btnAdd_Click()
+  
+  FCAdd.sTipo = sTipo
+  FCAdd.ShowDialog()
+  
+End
+
+Public Sub btnExcluir_Click()
+  
+  If Message.Question(Subst("Deseja excluir o(s) &1 registro(s) selecionado(s)?", cv.Selection.Count), "Sim", "Não") = 1 Then 
+    Try $conecta.Close()
+    $conecta = New Connection
+    $conecta.Type = "sqlite3"
+    $conecta.Host = FMain.dbPath 
+    $conecta.Name = FMain.dbName
+    $conecta.Open()
+    
+    For Each row As Integer In cv.Selection
+      $conecta.Exec("DELETE FROM mi_clientes WHERE id=&1 AND tipo=&2", row, sTipo)
+    Next 
+    
+    $conecta.Close()
+    
+    cv.Remove(cv.Key)
+    
+    carregarDados()
+  Endif 
+  
+End
+
+Public Sub Form_Open()
+  
+  cv.Columns.Count = 2
+  cv.Columns[0].Text = "ID"
+  cv.Columns[0].Width = 100
+  cv.Columns[1].Text = "Nome"
+  cv.Columns[1].Width = 479
+  cv.Header = True
+  
+  carregarDados()
+  
+End
+
+Public Sub btnEditar_Click()
+  
+  cv_DblClick
+  
+End
+
+Public Sub cv_DblClick()
+  
+  FCAdd.sTipo = sTipo
+  FCAdd.sID = cv[cv.Key][0]
+  FCAdd.ShowDialog()
+  
+End

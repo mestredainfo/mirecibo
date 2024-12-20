@@ -1,0 +1,20 @@
+# Gambas Project File 3.0
+Title=MIRecibo
+Startup=FMain
+Icon=mirecibo.png
+Version=0.0.1
+Component=gb.image
+Component=gb.gtk3
+Component=gb.form
+Component=gb.db
+Component=gb.db.sqlite3
+Component=gb.eval
+Component=gb.settings
+Component=gb.hash
+Component=gb.report2
+Description="Gerencie recibos para pagamentos com valor por extenso e calculo automático. The MIRecibo is under license GPL-2.0-only"
+Authors="Murilo Gomes Julio <contatomestredainfo@gmail.com>"
+TabSize=2
+Language=pt_BR
+Vendor=mestredainfo
+Packager=1
