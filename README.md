@@ -4,7 +4,7 @@ Gerencie recibos para pagamentos com valor por extenso e calculo automático.
 
 ## Information
 
-- [Page MIRecibo](https://www.mestredainfo.com.br)
+- [Page MIRecibo](https://www.mestredainfo.com.br/p/mirecibo.html)
 
 ## License
 
