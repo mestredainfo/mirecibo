@@ -1,6 +1,6 @@
 ' Gambas class file
 
-' Copyright (C) 2004-2024 Murilo Gomes Julio
+' Copyright (C) 2004-2025 Murilo Gomes Julio
 ' SPDX-License-Identifier: GPL-2.0-only
 
 ' Mestre da Info
@@ -49,6 +49,7 @@ Public Sub btnExcluir_Click()
     $conecta.Open()
     
     For Each row As Integer In cv.Selection
+      $conecta.Exec("DELETE FROM mi_recibos WHERE nome=&1 AND tipo=&2", row, sTipo)
       $conecta.Exec("DELETE FROM mi_clientes WHERE id=&1 AND tipo=&2", row, sTipo)
     Next 
     

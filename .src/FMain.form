@@ -3,7 +3,7 @@
 { Form Form
   MoveScaled(0,0,64,47)
   Font = Font["12"]
-  Text = ("MIRecibos")
+  Text = ("MIRecibo")
   Icon = Picture["mirecibo.png"]
   Resizable = False
   Arrangement = Arrange.Fill
@@ -42,6 +42,11 @@
   }
   { Menu5 Menu
     Text = ("Ajuda")
+    { mnuCheckUpdate Menu
+      Text = ("Verificar Atualizações")
+    }
+    { Menu8 Menu
+    }
     { mnuSuporte Menu
       Text = ("Suporte")
     }
